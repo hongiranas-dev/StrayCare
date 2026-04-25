@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "StrayCare"
+version = "1.0.0"
+id = "artifacts/straycare"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 24157
+
+[services.development]
+run = "pnpm --filter @workspace/straycare run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/straycare", "run", "build" ]
+publicDir = "artifacts/straycare/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "24157"
+BASE_PATH = "/"

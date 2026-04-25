@@ -14,3 +14,163 @@ import * as zod from "zod";
 export const HealthCheckResponse = zod.object({
   status: zod.string(),
 });
+
+/**
+ * @summary List all stray dog reports
+ */
+export const ListReportsResponseItem = zod.object({
+  id: zod.number(),
+  location: zod.string(),
+  description: zod.string(),
+  imagePath: zod
+    .string()
+    .nullish()
+    .describe(
+      "Object path of the uploaded image, or null if no image was provided.",
+    ),
+  status: zod.enum(["reported", "in_progress", "rescued"]),
+  createdAt: zod.coerce.date(),
+});
+export const ListReportsResponse = zod.array(ListReportsResponseItem);
+
+/**
+ * @summary Create a new stray dog report
+ */
+
+export const CreateReportBody = zod.object({
+  location: zod.string().min(1),
+  description: zod.string().min(1),
+  imagePath: zod.string().nullish(),
+});
+
+/**
+ * @summary Get a single stray dog report
+ */
+export const GetReportParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const GetReportResponse = zod.object({
+  id: zod.number(),
+  location: zod.string(),
+  description: zod.string(),
+  imagePath: zod
+    .string()
+    .nullish()
+    .describe(
+      "Object path of the uploaded image, or null if no image was provided.",
+    ),
+  status: zod.enum(["reported", "in_progress", "rescued"]),
+  createdAt: zod.coerce.date(),
+});
+
+/**
+ * @summary Update a stray dog report status
+ */
+export const UpdateReportParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const UpdateReportBody = zod.object({
+  status: zod.enum(["reported", "in_progress", "rescued"]).optional(),
+});
+
+export const UpdateReportResponse = zod.object({
+  id: zod.number(),
+  location: zod.string(),
+  description: zod.string(),
+  imagePath: zod
+    .string()
+    .nullish()
+    .describe(
+      "Object path of the uploaded image, or null if no image was provided.",
+    ),
+  status: zod.enum(["reported", "in_progress", "rescued"]),
+  createdAt: zod.coerce.date(),
+});
+
+/**
+ * @summary Delete a stray dog report
+ */
+export const DeleteReportParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+/**
+ * @summary Aggregated summary of all stray dog reports
+ */
+export const GetReportsSummaryResponse = zod.object({
+  total: zod.number(),
+  reported: zod.number(),
+  inProgress: zod.number(),
+  rescued: zod.number(),
+  last7Days: zod.number(),
+});
+
+/**
+ * @summary Get the most recent stray dog reports
+ */
+export const getRecentReportsQueryLimitDefault = 5;
+export const getRecentReportsQueryLimitMax = 50;
+
+export const GetRecentReportsQueryParams = zod.object({
+  limit: zod.coerce
+    .number()
+    .min(1)
+    .max(getRecentReportsQueryLimitMax)
+    .default(getRecentReportsQueryLimitDefault),
+});
+
+export const GetRecentReportsResponseItem = zod.object({
+  id: zod.number(),
+  location: zod.string(),
+  description: zod.string(),
+  imagePath: zod
+    .string()
+    .nullish()
+    .describe(
+      "Object path of the uploaded image, or null if no image was provided.",
+    ),
+  status: zod.enum(["reported", "in_progress", "rescued"]),
+  createdAt: zod.coerce.date(),
+});
+export const GetRecentReportsResponse = zod.array(GetRecentReportsResponseItem);
+
+/**
+ * Returns a presigned GCS URL for direct upload. The client sends JSON
+metadata here, then uploads the file directly to the returned URL.
+
+ * @summary Request a presigned URL for file upload
+ */
+
+export const RequestUploadUrlBody = zod.object({
+  name: zod.string().min(1),
+  size: zod.number().min(1),
+  contentType: zod.string().min(1),
+});
+
+export const RequestUploadUrlResponse = zod.object({
+  uploadURL: zod.string().url(),
+  objectPath: zod.string(),
+  metadata: zod
+    .object({
+      name: zod.string().min(1),
+      size: zod.number().min(1),
+      contentType: zod.string().min(1),
+    })
+    .optional(),
+});
+
+/**
+ * @summary Serve a public asset from PUBLIC_OBJECT_SEARCH_PATHS
+ */
+export const GetPublicObjectParams = zod.object({
+  filePath: zod.coerce.string(),
+});
+
+/**
+ * @summary Serve an object entity from PRIVATE_OBJECT_DIR
+ */
+export const GetStorageObjectParams = zod.object({
+  objectPath: zod.coerce.string(),
+});

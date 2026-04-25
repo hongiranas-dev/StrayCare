@@ -8,3 +8,81 @@
 export interface HealthStatus {
   status: string;
 }
+
+export type ReportStatus = (typeof ReportStatus)[keyof typeof ReportStatus];
+
+export const ReportStatus = {
+  reported: "reported",
+  in_progress: "in_progress",
+  rescued: "rescued",
+} as const;
+
+export interface Report {
+  id: number;
+  location: string;
+  description: string;
+  /**
+   * Object path of the uploaded image, or null if no image was provided.
+   * @nullable
+   */
+  imagePath?: string | null;
+  status: ReportStatus;
+  createdAt: string;
+}
+
+export interface CreateReportInput {
+  /** @minLength 1 */
+  location: string;
+  /** @minLength 1 */
+  description: string;
+  /** @nullable */
+  imagePath?: string | null;
+}
+
+export type UpdateReportInputStatus =
+  (typeof UpdateReportInputStatus)[keyof typeof UpdateReportInputStatus];
+
+export const UpdateReportInputStatus = {
+  reported: "reported",
+  in_progress: "in_progress",
+  rescued: "rescued",
+} as const;
+
+export interface UpdateReportInput {
+  status?: UpdateReportInputStatus;
+}
+
+export interface ReportsSummary {
+  total: number;
+  reported: number;
+  inProgress: number;
+  rescued: number;
+  last7Days: number;
+}
+
+export interface UploadUrlRequest {
+  /** @minLength 1 */
+  name: string;
+  /** @minimum 1 */
+  size: number;
+  /** @minLength 1 */
+  contentType: string;
+}
+
+export interface UploadUrlResponse {
+  uploadURL: string;
+  objectPath: string;
+  metadata?: UploadUrlRequest;
+}
+
+export interface ErrorEnvelope {
+  error: string;
+}
+
+export type GetRecentReportsParams = {
+  /**
+   * @minimum 1
+   * @maximum 50
+   */
+  limit?: number;
+};
