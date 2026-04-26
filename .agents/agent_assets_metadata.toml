@@ -1,0 +1,26 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "6fBzXKmZs7xs19cUfGD3N"
+uri = "file://artifacts/straycare/src/assets/safety/hero-community.jpg"
+type = "image"
+title = "calm community scene with a friendly dog walking alongside a person, warm lighting, photorealistic"
+
+[[outputs]]
+id = "gELMxvJ2YPb-SGyDSkkdw"
+uri = "file://artifacts/straycare/src/assets/safety/first-aid.jpg"
+type = "image"
+title = "person washing a minor wound or scratch under running water, first aid, photorealistic"
+
+[[outputs]]
+id = "zJuiJbzFAvcStf3qqmbQX"
+uri = "file://artifacts/straycare/src/assets/safety/rabies-vaccine.jpg"
+type = "image"
+title = "veterinarian or doctor holding a small medical vaccine vial, close up, warm lighting, photorealistic"
+
+[[outputs]]
+id = "sioKFkHqur7U-0rTHUcZ5"
+uri = "file://artifacts/straycare/src/assets/safety/stray-dog-encounter.jpg"
+type = "image"
+title = "person calmly walking past a dog on a street, staying calm and relaxed, photorealistic"

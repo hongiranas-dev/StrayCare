@@ -6,6 +6,7 @@ import { Header } from "./components/layout/Header";
 import { Home } from "./pages/Home";
 import { ReportDetail } from "./pages/ReportDetail";
 import { Admin } from "./pages/Admin";
+import { Safety } from "./pages/Safety";
 import NotFound from "./pages/not-found";
 
 const queryClient = new QueryClient({
@@ -25,6 +26,7 @@ function Router() {
       <main className="flex-1 w-full mx-auto relative z-0">
         <Switch>
           <Route path="/" component={Home} />
+          <Route path="/safety" component={Safety} />
           <Route path="/report/:id" component={ReportDetail} />
           <Route path="/admin" component={Admin} />
           <Route component={NotFound} />

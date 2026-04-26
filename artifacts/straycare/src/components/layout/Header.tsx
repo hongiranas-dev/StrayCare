@@ -45,6 +45,16 @@ export function Header() {
             Home
           </Link>
           <Link 
+            href="/safety" 
+            className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+              location === "/safety" 
+                ? "bg-background text-foreground shadow-sm" 
+                : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+            }`}
+          >
+            Safety
+          </Link>
+          <Link 
             href="/admin" 
             className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
               location === "/admin" 
@@ -68,6 +78,9 @@ export function Header() {
               <div className="flex flex-col gap-6 mt-8">
                 <Link href="/" className="flex items-center gap-3 p-3 rounded-2xl hover:bg-muted transition-colors">
                   <span className="font-medium text-lg">Home</span>
+                </Link>
+                <Link href="/safety" className="flex items-center gap-3 p-3 rounded-2xl hover:bg-muted transition-colors">
+                  <span className="font-medium text-lg">Safety</span>
                 </Link>
                 <Link href="/admin" className="flex items-center gap-3 p-3 rounded-2xl hover:bg-muted transition-colors">
                   <span className="font-medium text-lg">Rescue Team</span>
