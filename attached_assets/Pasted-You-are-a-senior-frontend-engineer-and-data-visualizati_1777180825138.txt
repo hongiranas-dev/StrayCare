@@ -1,0 +1,77 @@
+You are a senior frontend engineer and data visualization designer.
+
+Integrate a visually stunning "City Insights" section into the EXISTING StrayCare dashboard.
+
+IMPORTANT RULES:
+- Do NOT create a separate HTML file
+- Do NOT overwrite or remove existing functionality
+- Use the existing project structure and Tailwind CSS
+- Use zoneData from zones.js (DO NOT hardcode new data)
+
+DESIGN DIRECTION:
+"Modern Civic Dashboard" — clean, premium, slightly colorful but professional.
+Use green and orange gradients as accent colors.
+
+══════════════════════════════
+FEATURES TO BUILD:
+══════════════════════════════
+
+1. SECTION HEADER
+- Title: "City Insights"
+- Subtitle: "Zone-level stray dog analysis"
+- Add a small "Live Data" indicator
+
+2. SUMMARY CARDS (4 cards)
+- Total Zones
+- Total Population
+- Avg Neutered %
+- Highest Density Zone
+- Use gradient accents and clean card UI
+- Add count-up animation
+
+3. POPULATION CHART
+- Bar chart showing population by zone
+- Use Tailwind + simple div-based bars (no external libraries required)
+- Each bar has a different color
+- Smooth animation on load
+
+4. DENSITY CHART
+- Bar chart for density
+- Highlight zones where density > 500
+- Add "High Density" badge
+
+5. ZONE CARDS GRID
+Each card should show:
+- Zone name
+- Population
+- Density
+- Neutered percentage
+- Progress bar for neutered %
+- If density > 500 → show "High Risk" badge
+- Add hover effects and shadows
+
+6. HIGH PRIORITY SECTION
+Show zones where:
+- density > 500
+- neutered_percentage < 70
+
+Display them in a separate highlighted section.
+
+══════════════════════════════
+UI/UX REQUIREMENTS:
+══════════════════════════════
+
+- Match existing app theme (light or dark — keep consistent)
+- Use card-based layout
+- Use gradients (green → orange)
+- Add hover effects and smooth transitions
+- Keep design clean and readable (not overly flashy)
+- Fully responsive (mobile + desktop)
+
+══════════════════════════════
+OUTPUT:
+══════════════════════════════
+
+- Modify the existing dashboard page
+- Integrate seamlessly into current UI
+- Ensure no existing feature breaks

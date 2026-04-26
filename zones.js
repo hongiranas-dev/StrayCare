@@ -65,6 +65,7 @@ export const zoneData = [
     male: 21165,
     female: 13282,
     unknown: 1896,
+
     neutered_percentage: 66.5,
     area: 98.52,
     density: 368.89,

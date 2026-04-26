@@ -61,6 +61,8 @@ function AnimatedCounter({ value }: { value: number }) {
   return <span ref={ref}>{value}</span>;
 }
 
+import { CityInsights } from "@/components/CityInsights";
+
 export function Admin() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -268,7 +270,7 @@ export function Admin() {
         </div>
 
         {/* Reports List Section */}
-        <div className="space-y-6">
+        <div className="space-y-6 mb-16">
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div>
               <div className="flex items-center gap-4">
@@ -462,6 +464,8 @@ export function Admin() {
             </div>
           )}
         </div>
+
+        <CityInsights />
 
         <AlertDialog open={!!reportToDelete} onOpenChange={(open) => !open && setReportToDelete(null)}>
           <AlertDialogContent className="bg-[#1a1d24] border-white/10 text-white rounded-2xl">
