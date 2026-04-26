@@ -41,6 +41,8 @@
 
   --font-sans: var(--app-font-sans);
   --font-serif: var(--app-font-serif);
+  --font-admin-sans: var(--app-font-admin-sans);
+  --font-admin-serif: var(--app-font-admin-serif);
 
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -82,6 +84,8 @@
 
   --app-font-sans: 'Plus Jakarta Sans', sans-serif;
   --app-font-serif: 'Fraunces', serif;
+  --app-font-admin-sans: 'Inter', sans-serif;
+  --app-font-admin-serif: 'Sora', sans-serif;
 }
 
 .dark {
@@ -131,4 +135,23 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-image: linear-gradient(to right, hsl(var(--primary)), #eab308);
+}
+
+.admin-noise {
+  filter: url(#noiseFilter);
+  opacity: 0.04;
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+}
+
+@keyframes pulse-dot {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.4); opacity: 0.4; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.animate-pulse-dot {
+  animation: pulse-dot 2s ease-in-out infinite;
 }

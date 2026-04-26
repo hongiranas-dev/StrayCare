@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Switch, Route, Router as WouterRouter } from "wouter";
+import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Header } from "./components/layout/Header";
@@ -18,9 +18,10 @@ const queryClient = new QueryClient({
 });
 
 function Router() {
+  const [location] = useLocation();
   return (
     <div className="flex flex-col min-h-[100dvh] w-full bg-background selection:bg-primary/20">
-      <Header />
+      {location !== "/admin" && <Header />}
       <main className="flex-1 w-full mx-auto relative z-0">
         <Switch>
           <Route path="/" component={Home} />

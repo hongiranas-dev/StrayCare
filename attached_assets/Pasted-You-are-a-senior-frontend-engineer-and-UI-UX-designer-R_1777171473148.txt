@@ -1,0 +1,86 @@
+You are a senior frontend engineer and UI/UX designer. Rebuild the Admin/Volunteer dashboard page of StrayCare (a stray dog reporting app) into the most visually stunning, modern dashboard ever made — but still professional and clean.
+
+TECH STACK: Pure HTML + Tailwind CSS (CDN) + Vanilla JS. Single file. No frameworks.
+
+DESIGN DIRECTION: "Dark nature-tech" — deep dark backgrounds (#0f1117 base), vivid green-to-orange gradient accents, glassmorphism cards, smooth animations. Think Linear.app meets a wildlife NGO dashboard.
+
+EXACT REQUIREMENTS:
+
+1. BACKGROUND
+- Deep dark base: #0f1117
+- Subtle radial gradient blobs in the background (green #22c55e at 5% opacity, orange #f97316 at 5% opacity) positioned top-left and bottom-right
+- Slight noise/grain texture overlay using SVG filter
+
+2. NAVBAR
+- Glassmorphism effect: backdrop-blur, semi-transparent dark bg
+- Logo: 🐕 StrayCare in bold white, with "Admin" badge in green-orange gradient pill
+- Sticky top
+
+3. STATS ROW (4 cards)
+- Total Reports, Today, With Images, Rescued
+- Each card: glassmorphism dark card, border with 1px gradient stroke (green→orange)
+- Big animated counter number (count up on load using JS)
+- Small icon above number (use emoji or Unicode symbols)
+- Subtle hover: lift + glow
+
+4. STATUS BADGES
+- Reported → red pill (#ef4444 bg, white text)
+- In Progress → amber pill (#f59e0b bg, dark text)
+- Rescued → green pill (#22c55e bg, dark text)
+- Badges have a soft pulse animation when status = "Reported"
+
+5. REPORT CARDS (grid, 2-3 columns)
+Each card:
+- Glassmorphism: bg rgba(255,255,255,0.04), border 1px rgba(255,255,255,0.08), border-radius 16px
+- Top: image (if exists) with overlay gradient at bottom of image
+- Location line with 📍 icon in gradient color
+- Description text in muted white
+- Date in small gray text
+- Status badge (see above)
+- Bottom action row:
+  - Cycle status button (↻ icon) — cycles Reported → In Progress → Rescued → Reported
+  - Delete button (🗑 icon) — red on hover
+- On hover: scale(1.02), box-shadow with green glow (0 8px 32px rgba(34,197,94,0.15))
+- Entrance animation: cards fade+slide up with staggered delay (card 1 = 0ms, card 2 = 60ms, card 3 = 120ms...)
+
+6. SEARCH BAR
+- Dark glassmorphism input, white text, green focus ring
+- 🔍 icon inside left padding
+- Filters cards live as you type
+
+7. EMPTY STATE
+- Large centered illustration (use pure CSS/emoji art — a sleeping dog 🐕 with zzz)
+- Heading: "No reports yet" in white
+- Subtext: "Be the first to report a stray in your area" in muted gray
+- Green-orange gradient CTA button: "Submit First Report"
+
+8. ANIMATIONS
+- Page load: navbar slides down, stats cards pop in with spring effect (CSS keyframes)
+- Cards: staggered fade+translateY(20px) → translateY(0)
+- Stat counters: count up from 0 to value over 1 second on page load
+- Status badge pulse on "Reported" status
+- Smooth color transitions on all hover states (transition: all 0.3s ease)
+
+9. TYPOGRAPHY
+- Import: Google Fonts — "Sora" for headings, "Inter" for body
+- Section heading: "All Reports" in 20px Sora 700, white, with a green-orange gradient underline bar
+- Card location: 14px Sora 600, gradient text (green→orange using background-clip trick)
+- Description: 13px Inter 400, color #9ca3af
+
+10. SECTION HEADER ROW
+- Left: "All Reports" heading + live count badge
+- Right: search bar + "Clear All" button (red ghost button)
+
+DATA:
+- All data stored in localStorage key: 'straycare_reports'
+- Each report object: { id, location, desc, image (base64 or ''), date, status (default 'Reported') }
+- Status cycles on button click and saves back to localStorage
+
+OUTPUT:
+- Single complete HTML file
+- All CSS inline or in <style> tag
+- All JS in <script> tag at bottom
+- No external dependencies except Tailwind CDN and Google Fonts
+- Must work by just opening the file in a browser
+
+Do not explain anything. Output only the complete HTML file, starting with <!DOCTYPE html>.
