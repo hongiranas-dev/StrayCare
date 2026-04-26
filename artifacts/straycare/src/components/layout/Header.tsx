@@ -32,6 +32,7 @@ export function Header() {
           <span className="font-serif font-bold text-2xl tracking-tight text-foreground">StrayCare</span>
         </Link>
 
+        {/* Desktop Nav */}
         <nav className="hidden md:flex items-center gap-1 bg-secondary/50 backdrop-blur-sm px-1.5 py-1.5 rounded-full border border-border/50">
           <Link 
             href="/" 
@@ -53,18 +54,9 @@ export function Header() {
           >
             Rescue Team
           </Link>
-          <Link 
-            href="/safety-awareness" 
-            className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-              location === "/safety-awareness" 
-                ? "bg-background text-foreground shadow-sm" 
-                : "text-muted-foreground hover:text-foreground hover:bg-background/50"
-            }`}
-          >
-            Safety & Awareness
-          </Link>
         </nav>
 
+        {/* Mobile Nav */}
         <div className="md:hidden">
           <Sheet>
             <SheetTrigger asChild>
@@ -79,9 +71,6 @@ export function Header() {
                 </Link>
                 <Link href="/admin" className="flex items-center gap-3 p-3 rounded-2xl hover:bg-muted transition-colors">
                   <span className="font-medium text-lg">Rescue Team</span>
-                </Link>
-                <Link href="/safety-awareness" className="flex items-center gap-3 p-3 rounded-2xl hover:bg-muted transition-colors">
-                  <span className="font-medium text-lg">Safety & Awareness</span>
                 </Link>
               </div>
             </SheetContent>
