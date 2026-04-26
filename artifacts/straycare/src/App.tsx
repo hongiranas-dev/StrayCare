@@ -19,9 +19,9 @@ const queryClient = new QueryClient({
 
 function Router() {
   return (
-    <div className="flex flex-col min-h-screen w-full">
+    <div className="flex flex-col min-h-[100dvh] w-full bg-background selection:bg-primary/20">
       <Header />
-      <main className="flex-1 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+      <main className="flex-1 w-full mx-auto relative z-0">
         <Switch>
           <Route path="/" component={Home} />
           <Route path="/report/:id" component={ReportDetail} />

@@ -25,27 +25,29 @@ export function ImageUploadButton({ onUploadSuccess, onClear, currentPath }: Ima
 
   if (currentPath) {
     return (
-      <div className="relative rounded-lg overflow-hidden border aspect-video max-w-sm">
+      <div className="relative rounded-xl overflow-hidden border-2 border-primary/20 aspect-video max-w-sm group shadow-md">
         <img 
           src={`/api/storage${currentPath}`} 
           alt="Uploaded photo" 
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
-        <Button
-          type="button"
-          variant="destructive"
-          size="sm"
-          className="absolute top-2 right-2"
-          onClick={onClear}
-        >
-          Remove
-        </Button>
+        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+          <Button
+            type="button"
+            variant="destructive"
+            size="sm"
+            className="rounded-full shadow-lg"
+            onClick={onClear}
+          >
+            Remove Photo
+          </Button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="relative border-2 border-dashed rounded-lg p-6 hover:bg-muted/50 transition-colors flex flex-col items-center justify-center text-muted-foreground w-full">
+    <div className="relative border-2 border-dashed border-border rounded-xl p-8 bg-muted/30 hover:bg-primary/5 hover:border-primary/50 transition-all flex flex-col items-center justify-center text-muted-foreground w-full group">
       <input
         type="file"
         accept="image/*"
@@ -54,14 +56,16 @@ export function ImageUploadButton({ onUploadSuccess, onClear, currentPath }: Ima
         className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10 disabled:cursor-not-allowed"
       />
       {isUploading ? (
-        <Loader2 className="w-8 h-8 animate-spin mb-2 text-primary" />
+        <Loader2 className="w-10 h-10 animate-spin mb-3 text-primary" />
       ) : (
-        <ImageIcon className="w-8 h-8 mb-2 opacity-50" />
+        <div className="w-12 h-12 rounded-full bg-background shadow-sm flex items-center justify-center mb-3 group-hover:scale-110 transition-transform">
+          <ImageIcon className="w-6 h-6 text-primary/70" />
+        </div>
       )}
-      <span className="text-sm font-medium">
+      <span className="text-sm font-semibold text-foreground">
         {isUploading ? "Uploading..." : "Click to upload a photo"}
       </span>
-      {!isUploading && <span className="text-xs opacity-75 mt-1">Help volunteers recognize the dog</span>}
+      {!isUploading && <span className="text-sm mt-1">Help volunteers recognize the dog</span>}
     </div>
   );
 }
