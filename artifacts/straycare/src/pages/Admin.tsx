@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { Link } from "wouter";
 import { formatDistanceToNow, isToday } from "date-fns";
 import { 
@@ -17,7 +17,10 @@ import {
   RotateCw,
   Check,
   Moon,
-  Menu
+  Menu,
+  Flame,
+  Filter,
+  X
 } from "lucide-react";
 import { 
   useListReports, 
@@ -40,6 +43,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Input } from "@/components/ui/input";
 import { motion, AnimatePresence, useMotionValue, useSpring, animate } from "framer-motion";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { getZoneForLocation, getReportPriority } from "@/lib/zones-mapping";
+import { zoneData } from "@/data/zones";
 
 function AnimatedCounter({ value }: { value: number }) {
   const ref = useRef<HTMLSpanElement>(null);
@@ -68,8 +73,12 @@ export function Admin() {
   const queryClient = useQueryClient();
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedZoneId, setSelectedZoneId] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<"newest" | "priority">("newest");
   const [reportToDelete, setReportToDelete] = useState<Report | null>(null);
   const [cycleStatusMap, setCycleStatusMap] = useState<Record<number, "idle" | "success">>({});
+  
+  const reportsListRef = useRef<HTMLDivElement>(null);
 
   const { data: reports, isLoading: isLoadingReports } = useListReports();
   const { data: summary, isLoading: isLoadingSummary } = useGetReportsSummary();
@@ -114,16 +123,56 @@ export function Admin() {
     }
   };
 
-  const filteredReports = reports?.filter(r => {
-    const matchesStatus = statusFilter === "all" ? true : r.status === statusFilter;
-    const matchesSearch = r.location.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          r.description.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesStatus && matchesSearch;
-  }) || [];
+  const handleZoneSelect = (zoneId: string | null) => {
+    setSelectedZoneId(zoneId);
+    if (zoneId && reportsListRef.current) {
+      reportsListRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
+  const mappedReports = useMemo(() => {
+    if (!reports) return [];
+    return reports.map(r => ({
+      ...r,
+      zone: getZoneForLocation(r.location),
+      isHighPriority: getReportPriority(r.location)
+    }));
+  }, [reports]);
+
+  const filteredReports = useMemo(() => {
+    let result = mappedReports.filter(r => {
+      const matchesZone = selectedZoneId === null || (r.zone && r.zone.id === selectedZoneId);
+      const matchesStatus = statusFilter === "all" ? true : r.status === statusFilter;
+      const matchesSearch = r.location.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                            r.description.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchesZone && matchesStatus && matchesSearch;
+    });
+
+    result.sort((a, b) => {
+      if (sortBy === "priority") {
+        if (a.isHighPriority && !b.isHighPriority) return -1;
+        if (!a.isHighPriority && b.isHighPriority) return 1;
+      }
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+    });
+
+    return result;
+  }, [mappedReports, selectedZoneId, statusFilter, searchQuery, sortBy]);
 
   const todayCount = reports?.filter(r => isToday(new Date(r.createdAt))).length || 0;
   const withImagesCount = reports?.filter(r => r.imagePath !== null).length || 0;
   const withImagesPercent = reports?.length ? Math.round((withImagesCount / reports.length) * 100) : 0;
+  
+  const hasActiveFilters = searchQuery !== "" || statusFilter !== "all" || selectedZoneId !== null || sortBy !== "newest";
+  
+  const clearFilters = () => {
+    setSearchQuery("");
+    setStatusFilter("all");
+    setSelectedZoneId(null);
+    setSortBy("newest");
+  };
+
+  const selectedZoneName = selectedZoneId ? zoneData.find(z => z.id === selectedZoneId)?.name : null;
 
   return (
     <div className="dark min-h-screen bg-[#0f1117] text-white font-admin-sans relative overflow-hidden">
@@ -270,7 +319,7 @@ export function Admin() {
         </div>
 
         {/* Reports List Section */}
-        <div className="space-y-6 mb-16">
+        <div className="space-y-6 mb-16" ref={reportsListRef}>
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div>
               <div className="flex items-center gap-4">
@@ -303,15 +352,57 @@ export function Admin() {
                   <SelectItem value="rescued">Rescued</SelectItem>
                 </SelectContent>
               </Select>
+              <Select value={sortBy} onValueChange={(val: any) => setSortBy(val)}>
+                <SelectTrigger className="h-11 w-full sm:w-[150px] rounded-xl bg-white/[0.04] border-white/10 text-white">
+                  <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+                <SelectContent className="bg-[#1a1d24] border-white/10 text-white rounded-xl">
+                  <SelectItem value="newest">Newest first</SelectItem>
+                  <SelectItem value="priority">Priority first</SelectItem>
+                </SelectContent>
+              </Select>
               <Button 
                 variant="ghost" 
-                onClick={() => { setSearchQuery(""); setStatusFilter("all"); }}
-                className="h-11 rounded-xl text-red-400 hover:text-red-300 hover:bg-red-500/10 w-full sm:w-auto"
+                onClick={clearFilters}
+                disabled={!hasActiveFilters}
+                className="h-11 rounded-xl text-red-400 hover:text-red-300 hover:bg-red-500/10 w-full sm:w-auto disabled:opacity-50 disabled:hover:bg-transparent"
               >
                 Clear filters
               </Button>
             </div>
           </div>
+
+          <AnimatePresence>
+            {selectedZoneId && selectedZoneName && (
+              <motion.div
+                initial={{ opacity: 0, y: -10, height: 0 }}
+                animate={{ opacity: 1, y: 0, height: 'auto' }}
+                exit={{ opacity: 0, y: -10, height: 0 }}
+                className="overflow-hidden"
+              >
+                <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-r from-emerald-500/10 to-orange-500/10 border border-emerald-500/30 rounded-xl mb-6 backdrop-blur-md">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                      <Filter className="w-4 h-4 text-emerald-400" />
+                    </div>
+                    <div>
+                      <div className="text-white font-medium text-sm">Showing reports for <span className="font-bold">{selectedZoneName}</span></div>
+                      <div className="text-white/50 text-xs">{filteredReports.length} of {reports?.length || 0} reports</div>
+                    </div>
+                  </div>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => setSelectedZoneId(null)}
+                    className="text-white/70 hover:text-white hover:bg-white/10 h-8 rounded-lg text-xs"
+                  >
+                    View all reports
+                    <X className="w-3 h-3 ml-2" />
+                  </Button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {isLoadingReports ? (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -355,13 +446,24 @@ export function Admin() {
               </div>
               <h3 className="text-2xl font-admin-serif font-bold text-white mb-2">All quiet for now</h3>
               <p className="text-white/50 mb-8 max-w-md">
-                {searchQuery || statusFilter !== "all" 
-                  ? "No reports match your filters." 
-                  : "Be the first to report a stray in your area."}
+                {selectedZoneId 
+                  ? `No reports yet in ${selectedZoneName}.` 
+                  : searchQuery || statusFilter !== "all" 
+                    ? "No reports match your filters." 
+                    : "Be the first to report a stray in your area."}
               </p>
-              <Button asChild className="rounded-xl h-12 px-8 bg-gradient-to-r from-emerald-500 to-orange-500 text-white font-bold hover:shadow-lg hover:shadow-emerald-500/20 border-0">
-                <Link href="/">Submit a report</Link>
-              </Button>
+              {selectedZoneId ? (
+                <Button 
+                  onClick={() => setSelectedZoneId(null)}
+                  className="rounded-xl h-12 px-8 bg-white/10 text-white hover:bg-white/20 border border-white/20"
+                >
+                  View all reports
+                </Button>
+              ) : (
+                <Button asChild className="rounded-xl h-12 px-8 bg-gradient-to-r from-emerald-500 to-orange-500 text-white font-bold hover:shadow-lg hover:shadow-emerald-500/20 border-0">
+                  <Link href="/">Submit a report</Link>
+                </Button>
+              )}
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -387,17 +489,34 @@ export function Admin() {
                       </div>
                     )}
                     <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/80 to-transparent" />
+                    
+                    <div className="absolute top-4 right-4 flex flex-col items-end gap-2">
+                      <div onClick={(e) => e.stopPropagation()}>
+                        <ReportStatusBadge status={report.status} variant="dark" />
+                      </div>
+                      
+                      {report.isHighPriority && (
+                        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-rose-500/15 text-rose-300 border border-rose-500/30 shadow-[0_0_15px_rgba(244,63,94,0.2)]">
+                          <Flame className="w-3.5 h-3.5 animate-pulse-dot" />
+                          <span>High Priority</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
                   
                   <div className="p-5 flex-1 flex flex-col">
-                    <div className="flex items-start gap-2 mb-3">
-                      <span className="shrink-0 mt-0.5 text-emerald-400">
-                        <MapPin className="w-4 h-4" />
-                      </span>
-                      <h3 className="font-admin-serif font-semibold text-sm bg-gradient-to-r from-emerald-400 to-orange-400 bg-clip-text text-transparent line-clamp-2">
-                        {report.location}
-                      </h3>
+                    <div className="flex items-center gap-1.5 mb-3 text-[10px] font-bold uppercase tracking-widest">
+                      <MapPin className="w-3 h-3 text-emerald-400" />
+                      {report.zone ? (
+                        <span className="text-white/60">{report.zone.name}</span>
+                      ) : (
+                        <span className="text-white/40">Unmapped zone</span>
+                      )}
                     </div>
+                    
+                    <h3 className="font-admin-serif font-semibold text-sm bg-gradient-to-r from-emerald-400 to-orange-400 bg-clip-text text-transparent line-clamp-2 mb-2">
+                      {report.location}
+                    </h3>
                     
                     <p className="text-[13px] text-white/70 line-clamp-2 mb-3 font-admin-sans">
                       {report.description}
@@ -408,11 +527,7 @@ export function Admin() {
                     </div>
 
                     <div className="mt-auto flex items-center justify-between pt-4 border-t border-white/5">
-                      <div onClick={(e) => e.stopPropagation()}>
-                        <ReportStatusBadge status={report.status} variant="dark" />
-                      </div>
-                      
-                      <div className="flex items-center gap-1">
+                      <div className="flex items-center gap-1 w-full justify-end">
                         <Button 
                           variant="ghost" 
                           size="icon" 
@@ -465,7 +580,10 @@ export function Admin() {
           )}
         </div>
 
-        <CityInsights />
+        <CityInsights 
+          selectedZoneId={selectedZoneId} 
+          onSelectZone={handleZoneSelect} 
+        />
 
         <AlertDialog open={!!reportToDelete} onOpenChange={(open) => !open && setReportToDelete(null)}>
           <AlertDialogContent className="bg-[#1a1d24] border-white/10 text-white rounded-2xl">

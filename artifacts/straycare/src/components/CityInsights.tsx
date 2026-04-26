@@ -6,7 +6,9 @@ import {
   HeartPulse, 
   Flame, 
   AlertTriangle, 
-  ShieldCheck
+  ShieldCheck,
+  CheckCircle2,
+  X
 } from "lucide-react";
 import { zoneData } from "@/data/zones";
 
@@ -43,7 +45,12 @@ function AnimatedCounter({
   return <span ref={ref}>{formatValue(value)}</span>;
 }
 
-export function CityInsights() {
+interface CityInsightsProps {
+  selectedZoneId: string | null;
+  onSelectZone: (id: string | null) => void;
+}
+
+export function CityInsights({ selectedZoneId, onSelectZone }: CityInsightsProps) {
   const totalZones = zoneData.length;
   const totalPopulation = zoneData.reduce((sum, z) => sum + z.population, 0);
   const avgNeutered = zoneData.reduce((sum, z) => sum + z.neuteredPercentage, 0) / totalZones;
@@ -63,6 +70,8 @@ export function CityInsights() {
     "from-sky-500/80 to-sky-400/60",
     "from-teal-500/80 to-teal-400/60"
   ];
+  
+  const selectedZoneName = selectedZoneId ? zoneData.find(z => z.id === selectedZoneId)?.name : null;
 
   return (
     <div className="mt-16 space-y-10">
@@ -77,9 +86,20 @@ export function CityInsights() {
             <div className="h-1 w-20 bg-gradient-to-r from-emerald-500 to-orange-500 rounded-full mt-2 mb-2" />
             <p className="text-white/60 text-lg">Zone-level stray dog analysis</p>
           </div>
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.04] border border-white/10 text-white/80 text-xs font-medium shadow-sm">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse-dot" />
-            Live Data
+          <div className="flex items-center gap-3 flex-wrap">
+            {selectedZoneName && (
+              <button 
+                onClick={() => onSelectZone(null)}
+                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs font-medium shadow-sm hover:bg-emerald-500/20 transition-colors"
+              >
+                Filtering by {selectedZoneName}
+                <X className="w-3 h-3" />
+              </button>
+            )}
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/[0.04] border border-white/10 text-white/80 text-xs font-medium shadow-sm">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse-dot" />
+              Live Data
+            </div>
           </div>
         </div>
       </div>
@@ -148,10 +168,18 @@ export function CityInsights() {
             {zoneData.map((zone, i) => {
               const percent = (zone.population / maxPopulation) * 100;
               const colorClass = colors[i % colors.length];
+              const isSelected = selectedZoneId === zone.id;
+              const opacityClass = selectedZoneId && !isSelected ? "opacity-55" : "opacity-100";
+              
               return (
-                <div key={zone.id} className="flex items-center gap-4">
-                  <div className="w-[140px] shrink-0 text-white/80 font-admin-sans font-medium text-sm truncate" title={zone.name}>
-                    {zone.name}
+                <button 
+                  key={zone.id} 
+                  className={`w-full flex items-center gap-4 group transition-opacity duration-300 hover:opacity-100 ${opacityClass}`}
+                  onClick={() => onSelectZone(isSelected ? null : zone.id)}
+                >
+                  <div className={`w-[140px] shrink-0 text-left font-admin-sans text-sm truncate flex items-center gap-1.5 ${isSelected ? 'text-white font-bold' : 'text-white/80 font-medium'}`} title={zone.name}>
+                    {isSelected && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />}
+                    <span className="truncate block">{zone.name}</span>
                   </div>
                   <div className="flex-1 h-3 rounded-full bg-white/[0.06] overflow-hidden">
                     <motion.div 
@@ -165,7 +193,7 @@ export function CityInsights() {
                   <div className="w-16 shrink-0 text-right text-white/60 text-sm">
                     {zone.population.toLocaleString()}
                   </div>
-                </div>
+                </button>
               );
             })}
           </div>
@@ -185,10 +213,17 @@ export function CityInsights() {
               const maxDensity = Math.max(...zoneData.map(z => z.density));
               const percent = (zone.density / maxDensity) * 100;
               const isHigh = zone.density > 500;
+              const isSelected = selectedZoneId === zone.id;
+              const opacityClass = selectedZoneId && !isSelected ? "opacity-55" : "opacity-100";
               
               return (
-                <div key={zone.id} className="flex items-center gap-4">
-                  <div className="w-[140px] shrink-0 text-white/80 font-admin-sans font-medium text-sm flex items-center gap-2">
+                <button 
+                  key={zone.id} 
+                  className={`w-full flex items-center gap-4 group transition-opacity duration-300 hover:opacity-100 ${opacityClass}`}
+                  onClick={() => onSelectZone(isSelected ? null : zone.id)}
+                >
+                  <div className={`w-[140px] shrink-0 text-left font-admin-sans text-sm flex items-center gap-1.5 ${isSelected ? 'text-white font-bold' : 'text-white/80 font-medium'}`}>
+                    {isSelected && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />}
                     <span className="truncate block" title={zone.name}>{zone.name}</span>
                     {isHigh && (
                       <div className="shrink-0 flex items-center justify-center w-5 h-5 rounded-full bg-rose-500/15 border border-rose-500/30 text-rose-300">
@@ -208,7 +243,7 @@ export function CityInsights() {
                   <div className="w-12 shrink-0 text-right text-white/60 text-sm">
                     {zone.density}
                   </div>
-                </div>
+                </button>
               );
             })}
           </div>
@@ -225,17 +260,31 @@ export function CityInsights() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {zoneData.map((zone, i) => {
             const isHighDensity = zone.density > 500;
+            const isSelected = selectedZoneId === zone.id;
+            
             return (
-              <div key={zone.id} className="p-[1px] rounded-[17px] bg-gradient-to-br from-emerald-500/30 to-orange-500/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_32px_rgba(34,197,94,0.15)] group cursor-default">
-                <div className="relative rounded-2xl p-5 bg-[#0f1117]/80 backdrop-blur border border-white/[0.03] h-full flex flex-col transition-colors group-hover:bg-[#0f1117]/60 group-hover:border-white/[0.06]">
+              <button 
+                key={zone.id} 
+                onClick={() => onSelectZone(isSelected ? null : zone.id)}
+                className={`p-[1px] rounded-[17px] transition-all duration-300 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0f1117] ${isSelected ? 'bg-gradient-to-br from-emerald-400 to-orange-400 shadow-[0_8px_32px_rgba(34,197,94,0.2)] p-[2px]' : 'bg-gradient-to-br from-emerald-500/30 to-orange-500/30 hover:-translate-y-1 hover:shadow-[0_8px_32px_rgba(34,197,94,0.15)] group'}`}
+              >
+                <div className={`relative rounded-[15px] p-5 h-full flex flex-col transition-colors ${isSelected ? 'bg-[#151821] border border-transparent' : 'bg-[#0f1117]/80 backdrop-blur border border-white/[0.03] group-hover:bg-[#0f1117]/60 group-hover:border-white/[0.06]'}`}>
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="font-admin-serif text-lg font-semibold text-white/95">{zone.name}</h3>
-                    {isHighDensity && (
-                      <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-500/15 text-rose-300 border border-rose-500/30 uppercase tracking-wide">
-                        <AlertTriangle className="w-3 h-3" />
-                        <span>High Risk</span>
-                      </div>
-                    )}
+                    <div className="flex items-center gap-2">
+                      {isHighDensity && (
+                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-500/15 text-rose-300 border border-rose-500/30 uppercase tracking-wide">
+                          <AlertTriangle className="w-3 h-3" />
+                          <span>High Risk</span>
+                        </div>
+                      )}
+                      {isSelected && (
+                        <div className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 uppercase tracking-wide">
+                          <CheckCircle2 className="w-3 h-3" />
+                          <span>Selected</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
                   
                   <div className="grid grid-cols-3 gap-3 mb-6">
@@ -269,7 +318,7 @@ export function CityInsights() {
                     </div>
                   </div>
                 </div>
-              </div>
+              </button>
             );
           })}
         </div>
@@ -292,51 +341,67 @@ export function CityInsights() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {highPriorityZones.map((zone, i) => (
-              <div key={zone.id} className="relative group cursor-default">
-                <div className="absolute inset-0 bg-rose-500/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-                <div className="relative bg-gradient-to-br from-rose-500/[0.08] to-orange-500/[0.06] border border-rose-500/20 rounded-2xl p-5 h-full flex flex-col transition-all duration-300 group-hover:border-rose-500/40">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-admin-serif text-lg font-semibold text-white/95">{zone.name}</h3>
-                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40 uppercase tracking-wide shadow-[0_0_15px_rgba(244,63,94,0.2)]">
-                      <AlertTriangle className="w-3 h-3" />
-                      <span>High Priority</span>
+            {highPriorityZones.map((zone, i) => {
+              const isSelected = selectedZoneId === zone.id;
+              
+              return (
+                <button 
+                  key={zone.id} 
+                  onClick={() => onSelectZone(isSelected ? null : zone.id)}
+                  className="relative group text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 focus-visible:ring-offset-[#0f1117] rounded-[17px]"
+                >
+                  <div className="absolute inset-0 bg-rose-500/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
+                  <div className={`relative border rounded-2xl p-5 h-full flex flex-col transition-all duration-300 ${isSelected ? 'bg-[#151821] border-emerald-400 shadow-[0_0_20px_rgba(52,211,153,0.15)] ring-1 ring-emerald-400' : 'bg-gradient-to-br from-rose-500/[0.08] to-orange-500/[0.06] border-rose-500/20 group-hover:border-rose-500/40'}`}>
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="font-admin-serif text-lg font-semibold text-white/95">{zone.name}</h3>
+                      <div className="flex items-center gap-2">
+                        {isSelected && (
+                          <div className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 uppercase tracking-wide">
+                            <CheckCircle2 className="w-3 h-3" />
+                            <span>Selected</span>
+                          </div>
+                        )}
+                        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40 uppercase tracking-wide shadow-[0_0_15px_rgba(244,63,94,0.2)]">
+                          <AlertTriangle className="w-3 h-3" />
+                          <span>High Priority</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-3 gap-3 mb-6">
+                      <div>
+                        <div className="text-[10px] uppercase tracking-widest text-rose-300/60 mb-1">Population</div>
+                        <div className="font-admin-serif font-semibold text-white">{zone.population.toLocaleString()}</div>
+                      </div>
+                      <div>
+                        <div className="text-[10px] uppercase tracking-widest text-rose-300/60 mb-1">Density</div>
+                        <div className="font-admin-serif font-semibold text-white">{zone.density}<span className="text-xs text-white/50 font-normal"> /km²</span></div>
+                      </div>
+                      <div>
+                        <div className="text-[10px] uppercase tracking-widest text-rose-300/60 mb-1">Neutered</div>
+                        <div className="font-admin-serif font-semibold text-white">{zone.neuteredPercentage}%</div>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-auto pt-4 border-t border-rose-500/10">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs text-rose-200/70">Neutered Coverage</span>
+                        <span className="text-xs font-semibold text-rose-300">{zone.neuteredPercentage}%</span>
+                      </div>
+                      <div className="h-2 w-full rounded-full bg-rose-500/10 overflow-hidden">
+                        <motion.div 
+                          className="h-full rounded-full bg-gradient-to-r from-rose-500 to-orange-400"
+                          initial={{ width: 0 }}
+                          whileInView={{ width: `${zone.neuteredPercentage}%` }}
+                          viewport={{ once: true }}
+                          transition={{ duration: 0.8, delay: i * 0.1, ease: "easeOut" }}
+                        />
+                      </div>
                     </div>
                   </div>
-                  
-                  <div className="grid grid-cols-3 gap-3 mb-6">
-                    <div>
-                      <div className="text-[10px] uppercase tracking-widest text-rose-300/60 mb-1">Population</div>
-                      <div className="font-admin-serif font-semibold text-white">{zone.population.toLocaleString()}</div>
-                    </div>
-                    <div>
-                      <div className="text-[10px] uppercase tracking-widest text-rose-300/60 mb-1">Density</div>
-                      <div className="font-admin-serif font-semibold text-white">{zone.density}<span className="text-xs text-white/50 font-normal"> /km²</span></div>
-                    </div>
-                    <div>
-                      <div className="text-[10px] uppercase tracking-widest text-rose-300/60 mb-1">Neutered</div>
-                      <div className="font-admin-serif font-semibold text-white">{zone.neuteredPercentage}%</div>
-                    </div>
-                  </div>
-                  
-                  <div className="mt-auto pt-4 border-t border-rose-500/10">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs text-rose-200/70">Neutered Coverage</span>
-                      <span className="text-xs font-semibold text-rose-300">{zone.neuteredPercentage}%</span>
-                    </div>
-                    <div className="h-2 w-full rounded-full bg-rose-500/10 overflow-hidden">
-                      <motion.div 
-                        className="h-full rounded-full bg-gradient-to-r from-rose-500 to-orange-400"
-                        initial={{ width: 0 }}
-                        whileInView={{ width: `${zone.neuteredPercentage}%` }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.8, delay: i * 0.1, ease: "easeOut" }}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
+                </button>
+              );
+            })}
           </div>
         )}
       </div>
